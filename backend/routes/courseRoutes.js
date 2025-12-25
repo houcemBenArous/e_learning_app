@@ -10,5 +10,6 @@ const {
 router.post("/", auth, createCourse);
 router.get("/", getCourses);
 router.get("/:id", getCourseById);
+router.post("/:id/enroll", auth, enrollCourse);
 
 module.exports = router;
