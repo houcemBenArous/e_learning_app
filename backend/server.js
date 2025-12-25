@@ -3,6 +3,8 @@ const cors = require("cors");
 require("dotenv").config();
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
+const courseRoutes = require("./routes/courseRoutes");
 
 const app = express();
 
@@ -15,6 +17,12 @@ app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
   res.send("API E-Learning running");
 });
+
+app.use("/api/profile", profileRoutes);
+
+app.use("/api/courses", courseRoutes);
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
