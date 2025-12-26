@@ -9,6 +9,13 @@ exports.createLesson = async (req, res) => {
   if (!course)
     return res.status(404).json({ message: "Course not found" });
 
+  // Verify ownership
+  if (course.instructor.toString() !== req.user._id.toString()) {
+    return res.status(403).json({
+      message: "You are not allowed to add lessons to this course"
+    });
+  }
+
   const lesson = await Lesson.create({
     title,
     content,
@@ -31,17 +38,44 @@ exports.getLessonsByCourse = async (req, res) => {
 
 // UPDATE lesson
 exports.updateLesson = async (req, res) => {
-  const lesson = await Lesson.findByIdAndUpdate(
+  const lesson = await Lesson.findById(req.params.id);
+  if (!lesson)
+    return res.status(404).json({ message: "Lesson not found" });
+
+  const course = await Course.findById(lesson.course);
+  if (course.instructor.toString() !== req.user._id.toString()) {
+    return res.status(403).json({
+      message: "You are not allowed to update this lesson"
+    });
+  }
+
+  const updatedLesson = await Lesson.findByIdAndUpdate(
     req.params.id,
     req.body,
     { new: true }
   );
 
-  res.json(lesson);
+  res.json(updatedLesson);
 };
 
 // DELETE lesson
 exports.deleteLesson = async (req, res) => {
-  await Lesson.findByIdAndDelete(req.params.id);
+  const lesson = await Lesson.findById(req.params.id);
+  if (!lesson)
+    return res.status(404).json({ message: "Lesson not found" });
+
+  const course = await Course.findById(lesson.course);
+  if (course.instructor.toString() !== req.user._id.toString()) {
+    return res.status(403).json({
+      message: "You are not allowed to delete this lesson"
+    });
+  }
+
+  // Remove lesson from course
+  await Course.findByIdAndUpdate(lesson.course, {
+    $pull: { lessons: lesson._id }
+  });
+
+  await lesson.deleteOne();
   res.json({ message: "Lesson deleted" });
 };

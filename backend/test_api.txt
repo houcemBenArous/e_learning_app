@@ -1,0 +1,570 @@
+═══════════════════════════════════════════════════════════════════
+    E-LEARNING API - POSTMAN TESTING GUIDE
+═══════════════════════════════════════════════════════════════════
+
+BASE URL: http://localhost:5000
+
+═══════════════════════════════════════════════════════════════════
+📁 1. AUTHENTICATION APIs (/api/auth)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 1.1 REGISTER USER                                                │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/auth/register
+HEADERS:  Content-Type: application/json
+
+BODY (JSON):
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+EXPECTED OUTPUT (201):
+{
+  "message": "User created"
+}
+
+NOTE: User role defaults to "student"
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 1.2 LOGIN USER                                                   │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/auth/login
+HEADERS:  Content-Type: application/json
+
+BODY (JSON):
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+
+EXPECTED OUTPUT (200):
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+
+⚠️ IMPORTANT: Save this token! You'll need it for protected routes.
+
+
+═══════════════════════════════════════════════════════════════════
+📁 2. PROFILE APIs (/api/profile)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 2.1 CREATE/UPDATE PROFILE                                        │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/profile
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <YOUR_TOKEN_HERE>
+
+BODY (JSON):
+{
+  "bio": "Passionate web developer",
+  "avatar": "https://example.com/avatar.jpg",
+  "skills": ["JavaScript", "React", "Node.js"]
+}
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65abc123...",
+  "user": "65xyz789...",
+  "bio": "Passionate web developer",
+  "avatar": "https://example.com/avatar.jpg",
+  "skills": ["JavaScript", "React", "Node.js"],
+  "createdAt": "2025-12-26T...",
+  "updatedAt": "2025-12-26T..."
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 2.2 GET MY PROFILE                                               │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/profile/me
+HEADERS:  
+  Authorization: Bearer <YOUR_TOKEN_HERE>
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65abc123...",
+  "user": {
+    "_id": "65xyz789...",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "role": "student"
+  },
+  "bio": "Passionate web developer",
+  "avatar": "https://example.com/avatar.jpg",
+  "skills": ["JavaScript", "React", "Node.js"]
+}
+
+
+═══════════════════════════════════════════════════════════════════
+📁 3. COURSE APIs (/api/courses)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.1 CREATE COURSE (INSTRUCTOR ONLY)                             │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/courses
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Complete Node.js Course",
+  "description": "Learn Node.js from scratch"
+}
+
+EXPECTED OUTPUT (201):
+{
+  "_id": "65course123...",
+  "title": "Complete Node.js Course",
+  "description": "Learn Node.js from scratch",
+  "instructor": "65instructor456...",
+  "students": [],
+  "lessons": [],
+  "quizzes": [],
+  "createdAt": "2025-12-26T...",
+  "updatedAt": "2025-12-26T..."
+}
+
+⚠️ NOTE: You must register as an instructor first! Update user 
+         role to "instructor" in MongoDB manually.
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.2 GET ALL COURSES (PUBLIC)                                     │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/courses
+
+EXPECTED OUTPUT (200):
+[
+  {
+    "_id": "65course123...",
+    "title": "Complete Node.js Course",
+    "description": "Learn Node.js from scratch",
+    "instructor": {
+      "_id": "65instructor456...",
+      "name": "Jane Instructor"
+    },
+    "students": [],
+    "lessons": [],
+    "quizzes": []
+  }
+]
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.3 GET COURSE BY ID (PUBLIC)                                    │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/courses/<COURSE_ID>
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65course123...",
+  "title": "Complete Node.js Course",
+  "description": "Learn Node.js from scratch",
+  "instructor": {
+    "_id": "65instructor456...",
+    "name": "Jane Instructor",
+    "email": "jane@example.com"
+  },
+  "students": [],
+  "lessons": [],
+  "quizzes": []
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.4 UPDATE COURSE (INSTRUCTOR ONLY - OWNER)                     │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   PUT
+URL:      http://localhost:5000/api/courses/<COURSE_ID>
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Complete Node.js & Express Course",
+  "description": "Updated description"
+}
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65course123...",
+  "title": "Complete Node.js & Express Course",
+  "description": "Updated description",
+  "instructor": "65instructor456...",
+  ...
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.5 DELETE COURSE (INSTRUCTOR ONLY - OWNER)                     │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   DELETE
+URL:      http://localhost:5000/api/courses/<COURSE_ID>
+HEADERS:  
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Course deleted successfully"
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3.6 ENROLL IN COURSE (STUDENT ONLY)                             │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/courses/<COURSE_ID>/enroll
+HEADERS:  
+  Authorization: Bearer <STUDENT_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Enrolled successfully",
+  "course": "Complete Node.js Course"
+}
+
+
+═══════════════════════════════════════════════════════════════════
+📁 4. LESSON APIs (/api/lessons)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 4.1 CREATE LESSON (INSTRUCTOR ONLY - COURSE OWNER)              │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/lessons
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Introduction to Node.js",
+  "content": "Node.js is a JavaScript runtime...",
+  "videoUrl": "https://youtube.com/watch?v=...",
+  "courseId": "65course123..."
+}
+
+EXPECTED OUTPUT (201):
+{
+  "_id": "65lesson789...",
+  "title": "Introduction to Node.js",
+  "content": "Node.js is a JavaScript runtime...",
+  "videoUrl": "https://youtube.com/watch?v=...",
+  "course": "65course123...",
+  "createdAt": "2025-12-26T...",
+  "updatedAt": "2025-12-26T..."
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 4.2 GET LESSONS BY COURSE (AUTHENTICATED)                       │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/lessons/course/<COURSE_ID>
+HEADERS:  
+  Authorization: Bearer <YOUR_TOKEN>
+
+EXPECTED OUTPUT (200):
+[
+  {
+    "_id": "65lesson789...",
+    "title": "Introduction to Node.js",
+    "content": "Node.js is a JavaScript runtime...",
+    "videoUrl": "https://youtube.com/watch?v=...",
+    "course": "65course123..."
+  }
+]
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 4.3 UPDATE LESSON (INSTRUCTOR ONLY - COURSE OWNER)              │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   PUT
+URL:      http://localhost:5000/api/lessons/<LESSON_ID>
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Updated: Introduction to Node.js",
+  "content": "Updated content..."
+}
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65lesson789...",
+  "title": "Updated: Introduction to Node.js",
+  "content": "Updated content...",
+  ...
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 4.4 DELETE LESSON (INSTRUCTOR ONLY - COURSE OWNER)              │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   DELETE
+URL:      http://localhost:5000/api/lessons/<LESSON_ID>
+HEADERS:  
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Lesson deleted"
+}
+
+
+═══════════════════════════════════════════════════════════════════
+📁 5. QUIZ APIs (/api/quizzes)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 5.1 CREATE QUIZ (INSTRUCTOR ONLY - COURSE OWNER)                │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/quizzes
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Node.js Basics Quiz",
+  "courseId": "65course123...",
+  "questions": [
+    {
+      "question": "What is Node.js?",
+      "options": ["A framework", "A runtime", "A database", "A CMS"],
+      "answer": 1
+    },
+    {
+      "question": "Which command installs packages?",
+      "options": ["npm start", "npm install", "npm init", "npm run"],
+      "answer": 1
+    }
+  ]
+}
+
+EXPECTED OUTPUT (201):
+{
+  "_id": "65quiz456...",
+  "title": "Node.js Basics Quiz",
+  "course": "65course123...",
+  "questions": [
+    {
+      "question": "What is Node.js?",
+      "options": ["A framework", "A runtime", "A database", "A CMS"],
+      "answer": 1,
+      "_id": "65q1..."
+    },
+    {
+      "question": "Which command installs packages?",
+      "options": ["npm start", "npm install", "npm init", "npm run"],
+      "answer": 1,
+      "_id": "65q2..."
+    }
+  ],
+  "createdAt": "2025-12-26T...",
+  "updatedAt": "2025-12-26T..."
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 5.2 GET QUIZZES BY COURSE (AUTHENTICATED)                       │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/quizzes/course/<COURSE_ID>
+HEADERS:  
+  Authorization: Bearer <YOUR_TOKEN>
+
+EXPECTED OUTPUT (200):
+[
+  {
+    "_id": "65quiz456...",
+    "title": "Node.js Basics Quiz",
+    "course": "65course123...",
+    "questions": [...]
+  }
+]
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 5.3 UPDATE QUIZ (INSTRUCTOR ONLY - COURSE OWNER)                │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   PUT
+URL:      http://localhost:5000/api/quizzes/<QUIZ_ID>
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+BODY (JSON):
+{
+  "title": "Updated: Node.js Basics Quiz"
+}
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65quiz456...",
+  "title": "Updated: Node.js Basics Quiz",
+  ...
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 5.4 DELETE QUIZ (INSTRUCTOR ONLY - COURSE OWNER)                │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   DELETE
+URL:      http://localhost:5000/api/quizzes/<QUIZ_ID>
+HEADERS:  
+  Authorization: Bearer <INSTRUCTOR_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Quiz deleted successfully"
+}
+
+
+═══════════════════════════════════════════════════════════════════
+🔐 AUTHORIZATION GUIDE
+═══════════════════════════════════════════════════════════════════
+
+1. SETTING UP AUTHORIZATION IN POSTMAN:
+   
+   Step 1: Login and copy the token from response
+   Step 2: Go to the request you want to test
+   Step 3: Click on "Authorization" tab
+   Step 4: Select "Bearer Token" from Type dropdown
+   Step 5: Paste your token in the Token field
+   
+   OR manually add to Headers:
+   Key: Authorization
+   Value: Bearer <YOUR_TOKEN_HERE>
+
+
+2. ROLE-BASED ACCESS:
+
+   STUDENT can:
+   ✓ View courses, lessons, quizzes
+   ✓ Enroll in courses
+   ✓ Create/update own profile
+   
+   INSTRUCTOR can:
+   ✓ All student permissions
+   ✓ Create courses
+   ✓ Update/delete own courses
+   ✓ Add/update/delete lessons in own courses
+   ✓ Add/update/delete quizzes in own courses
+
+
+3. CREATING AN INSTRUCTOR USER:
+
+   Since registration defaults to "student", you need to manually
+   update the user role in MongoDB:
+   
+   db.users.updateOne(
+     { email: "instructor@example.com" },
+     { $set: { role: "instructor" } }
+   )
+
+
+═══════════════════════════════════════════════════════════════════
+🧪 TESTING WORKFLOW (RECOMMENDED ORDER)
+═══════════════════════════════════════════════════════════════════
+
+TEST SEQUENCE:
+
+1. Register a student user
+2. Login as student → Save token
+3. Create/update student profile
+4. Get profile
+
+5. Register an instructor user (via Postman)
+6. Update user role to "instructor" (via MongoDB)
+7. Login as instructor → Save token
+8. Create a course
+9. Get all courses
+
+10. Add lessons to the course
+11. Add quizzes to the course
+12. Get lessons by course
+13. Get quizzes by course
+
+14. Login as student again
+15. Enroll in the course
+16. Get course by ID (verify enrollment)
+
+17. Try to update course as student (should fail - 403)
+18. Try to delete lesson as student (should fail - 403)
+
+
+═══════════════════════════════════════════════════════════════════
+⚠️ COMMON ERRORS & SOLUTIONS
+═══════════════════════════════════════════════════════════════════
+
+ERROR: "No token"
+→ You forgot to add Authorization header
+
+ERROR: "Invalid token"
+→ Token expired or malformed. Login again.
+
+ERROR: "Access denied: insufficient permissions"
+→ You're using wrong role (e.g., student trying to create course)
+
+ERROR: "You are not allowed to update this course"
+→ You're not the owner of this resource
+
+ERROR: "Already enrolled"
+→ Student is already enrolled in this course
+
+ERROR: "Course not found"
+→ Invalid course ID or course was deleted
+
+
+═══════════════════════════════════════════════════════════════════
+📝 NOTES
+═══════════════════════════════════════════════════════════════════
+
+• All timestamps are in ISO 8601 format
+• MongoDB ObjectIds are 24-character hex strings
+• JWT tokens expire in 1 day (configurable in backend)
+• CORS is enabled for all origins (modify in production!)
+• Server runs on PORT 5000 by default
+• Make sure MongoDB is running before testing
+
+═══════════════════════════════════════════════════════════════════

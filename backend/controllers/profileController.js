@@ -2,8 +2,8 @@ const Profile = require("../models/Profile");
 
 exports.createOrUpdateProfile = async (req, res) => {
   const profile = await Profile.findOneAndUpdate(
-    { user: req.user.id },
-    { ...req.body, user: req.user.id },
+    { user: req.user._id },
+    { ...req.body, user: req.user._id },
     { new: true, upsert: true }
   );
 
@@ -11,6 +11,6 @@ exports.createOrUpdateProfile = async (req, res) => {
 };
 
 exports.getMyProfile = async (req, res) => {
-  const profile = await Profile.findOne({ user: req.user.id }).populate("user");
+  const profile = await Profile.findOne({ user: req.user._id }).populate("user");
   res.json(profile);
 };
