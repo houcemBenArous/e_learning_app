@@ -10,6 +10,10 @@ const courseSchema = new mongoose.Schema({
   students: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
+  }],
+  lessons: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Lesson"
   }]
 }, { timestamps: true });
 

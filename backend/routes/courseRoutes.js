@@ -4,7 +4,10 @@ const auth = require("../middleware/authMiddleware");
 const {
   createCourse,
   getCourses,
-  getCourseById
+  getCourseById,
+  updateCourse,
+  deleteCourse,
+  enrollCourse
 } = require("../controllers/courseController");
 
 router.post("/", auth, role("instructor"), createCourse);
