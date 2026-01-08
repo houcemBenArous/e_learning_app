@@ -6,7 +6,7 @@ export const feedbackAPI = {
     return response.data;
   },
 
-  getByCoursе: async (courseId) => {
+  getByCourse: async (courseId) => {
     const response = await api.get(`/feedback/course/${courseId}`);
     return response.data;
   },

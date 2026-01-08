@@ -1,0 +1,82 @@
+.my-courses-page {
+  min-height: calc(100vh - 70px);
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-header h1 {
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.page-header p {
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.enrolled-course-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.enrolled-course-card .course-icon {
+  font-size: 2.5rem;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  padding: 1rem;
+  border-radius: 12px;
+}
+
+.enrolled-course-card .course-info {
+  flex: 1;
+}
+
+.enrolled-course-card h3 {
+  color: #1a1a2e;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+.enrolled-course-card .instructor {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}

@@ -133,6 +133,10 @@ exports.getDashboard = async (req, res) => {
     const totalStudents = await User.countDocuments({ role: "student" });
     const totalCourses = await Course.countDocuments();
 
+    // Debug: Get all users to see what's in the database
+    const allUsers = await User.find({}, 'name email role createdAt').sort({ createdAt: -1 });
+    console.log('🔍 All users in database:', allUsers);
+
     // Cours récents
     const recentCourses = await Course.find()
       .populate("instructor", "name email")
@@ -152,7 +156,15 @@ exports.getDashboard = async (req, res) => {
         totalCourses
       },
       recentCourses,
-      recentInstructors
+      recentInstructors,
+      debug: {
+        allUsers: allUsers.length,
+        userBreakdown: {
+          admins: allUsers.filter(u => u.role === 'admin').length,
+          instructors: allUsers.filter(u => u.role === 'instructor').length,
+          students: allUsers.filter(u => u.role === 'student').length
+        }
+      }
     });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la récupération du dashboard", error: error.message });
