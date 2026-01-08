@@ -1,0 +1,408 @@
+═══════════════════════════════════════════════════════════════════
+    FEEDBACK & RATING SYSTEM - API TESTING GUIDE
+═══════════════════════════════════════════════════════════════════
+
+BASE URL: http://localhost:5000
+
+═══════════════════════════════════════════════════════════════════
+📁 FEEDBACK APIs (/api/feedback)
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. CREATE FEEDBACK (STUDENT ONLY - ENROLLED)                     │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/feedback
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <STUDENT_TOKEN>
+
+BODY (JSON):
+{
+  "courseId": "65course123...",
+  "courseRating": 5,
+  "courseReview": "Excellent course! Very well structured and informative.",
+  "instructorRating": 4,
+  "instructorReview": "Great instructor, very knowledgeable and helpful."
+}
+
+EXPECTED OUTPUT (201):
+{
+  "message": "Feedback created successfully",
+  "feedback": {
+    "_id": "65feedback789...",
+    "student": {
+      "_id": "65student456...",
+      "name": "John Doe"
+    },
+    "course": {
+      "_id": "65course123...",
+      "title": "Complete Node.js Course"
+    },
+    "instructor": {
+      "_id": "65instructor456...",
+      "name": "Jane Instructor"
+    },
+    "courseRating": 5,
+    "courseReview": "Excellent course! Very well structured and informative.",
+    "instructorRating": 4,
+    "instructorReview": "Great instructor, very knowledgeable and helpful.",
+    "helpfulVotes": 0,
+    "createdAt": "2025-01-08T...",
+    "updatedAt": "2025-01-08T..."
+  }
+}
+
+BUSINESS RULES:
+- Only enrolled students can leave feedback
+- One feedback per student per course
+- Both course and instructor ratings are required (1-5 stars)
+- Reviews are optional but limited to 1000 characters
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. GET COURSE FEEDBACK (PUBLIC)                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/feedback/course/<COURSE_ID>
+QUERY PARAMS (optional):
+  - page=1 (pagination)
+  - limit=10 (results per page)
+  - sortBy=createdAt (sort field)
+  - order=desc (asc/desc)
+
+EXPECTED OUTPUT (200):
+{
+  "feedbacks": [
+    {
+      "_id": "65feedback789...",
+      "student": {
+        "_id": "65student456...",
+        "name": "John Doe"
+      },
+      "courseRating": 5,
+      "courseReview": "Excellent course! Very well structured and informative.",
+      "instructorRating": 4,
+      "instructorReview": "Great instructor, very knowledgeable and helpful.",
+      "helpfulVotes": 3,
+      "createdAt": "2025-01-08T..."
+    }
+  ],
+  "totalPages": 1,
+  "currentPage": 1,
+  "total": 1,
+  "courseInfo": {
+    "title": "Complete Node.js Course",
+    "averageRating": 4.8,
+    "totalReviews": 15,
+    "ratingDistribution": {
+      "5": 10,
+      "4": 3,
+      "3": 2,
+      "2": 0,
+      "1": 0
+    }
+  }
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. GET INSTRUCTOR FEEDBACK (PUBLIC)                              │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/feedback/instructor/<INSTRUCTOR_ID>
+QUERY PARAMS (optional):
+  - page=1 (pagination)
+  - limit=10 (results per page)
+  - sortBy=createdAt (sort field)
+  - order=desc (asc/desc)
+
+EXPECTED OUTPUT (200):
+{
+  "feedbacks": [
+    {
+      "_id": "65feedback789...",
+      "student": {
+        "_id": "65student456...",
+        "name": "John Doe"
+      },
+      "course": {
+        "_id": "65course123...",
+        "title": "Complete Node.js Course"
+      },
+      "instructorRating": 4,
+      "instructorReview": "Great instructor, very knowledgeable and helpful.",
+      "helpfulVotes": 3,
+      "createdAt": "2025-01-08T..."
+    }
+  ],
+  "totalPages": 1,
+  "currentPage": 1,
+  "total": 1,
+  "instructorInfo": {
+    "name": "Jane Instructor",
+    "instructorRating": 4.2,
+    "totalInstructorReviews": 25,
+    "instructorRatingDistribution": {
+      "5": 8,
+      "4": 12,
+      "3": 4,
+      "2": 1,
+      "1": 0
+    }
+  }
+}
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. UPDATE FEEDBACK (STUDENT ONLY - OWN FEEDBACK)                 │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   PUT
+URL:      http://localhost:5000/api/feedback/<FEEDBACK_ID>
+HEADERS:  
+  Content-Type: application/json
+  Authorization: Bearer <STUDENT_TOKEN>
+
+BODY (JSON):
+{
+  "courseRating": 4,
+  "courseReview": "Updated review: Good course, but could use more examples.",
+  "instructorRating": 5,
+  "instructorReview": "Updated: Excellent instructor, very responsive to questions."
+}
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Feedback updated successfully",
+  "feedback": {
+    "_id": "65feedback789...",
+    "courseRating": 4,
+    "courseReview": "Updated review: Good course, but could use more examples.",
+    "instructorRating": 5,
+    "instructorReview": "Updated: Excellent instructor, very responsive to questions.",
+    "updatedAt": "2025-01-08T..."
+  }
+}
+
+BUSINESS RULES:
+- Only the student who created the feedback can update it
+- Feedback can only be edited within 30 days of creation
+- All rating and review fields can be updated
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 5. DELETE FEEDBACK (STUDENT ONLY - OWN FEEDBACK)                 │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   DELETE
+URL:      http://localhost:5000/api/feedback/<FEEDBACK_ID>
+HEADERS:  
+  Authorization: Bearer <STUDENT_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Feedback deleted successfully"
+}
+
+BUSINESS RULES:
+- Only the student who created the feedback can delete it
+- Deleting feedback updates course and instructor rating aggregates
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 6. MARK FEEDBACK AS HELPFUL (AUTHENTICATED)                      │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   POST
+URL:      http://localhost:5000/api/feedback/<FEEDBACK_ID>/helpful
+HEADERS:  
+  Authorization: Bearer <YOUR_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "message": "Feedback marked as helpful",
+  "helpfulVotes": 4
+}
+
+BUSINESS RULES:
+- Any authenticated user can mark feedback as helpful
+- Each vote increments the helpfulVotes counter
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ 7. GET MY FEEDBACK (STUDENT ONLY)                                │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/feedback/my-feedback
+HEADERS:  
+  Authorization: Bearer <STUDENT_TOKEN>
+
+EXPECTED OUTPUT (200):
+{
+  "feedbacks": [
+    {
+      "_id": "65feedback789...",
+      "course": {
+        "_id": "65course123...",
+        "title": "Complete Node.js Course"
+      },
+      "instructor": {
+        "_id": "65instructor456...",
+        "name": "Jane Instructor"
+      },
+      "courseRating": 5,
+      "courseReview": "Excellent course!",
+      "instructorRating": 4,
+      "instructorReview": "Great instructor!",
+      "helpfulVotes": 3,
+      "createdAt": "2025-01-08T..."
+    }
+  ]
+}
+
+
+═══════════════════════════════════════════════════════════════════
+📊 UPDATED COURSE & INSTRUCTOR DATA
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ENHANCED COURSE DATA (with ratings)                              │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/courses
+
+EXPECTED OUTPUT (200):
+[
+  {
+    "_id": "65course123...",
+    "title": "Complete Node.js Course",
+    "description": "Learn Node.js from scratch",
+    "instructor": {
+      "_id": "65instructor456...",
+      "name": "Jane Instructor",
+      "instructorRating": 4.2,
+      "totalInstructorReviews": 25
+    },
+    "averageRating": 4.8,
+    "totalReviews": 15,
+    "createdAt": "2025-01-08T..."
+  }
+]
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ ENHANCED COURSE DETAILS (with full rating info)                  │
+└─────────────────────────────────────────────────────────────────┘
+
+METHOD:   GET
+URL:      http://localhost:5000/api/courses/<COURSE_ID>
+
+EXPECTED OUTPUT (200):
+{
+  "_id": "65course123...",
+  "title": "Complete Node.js Course",
+  "description": "Learn Node.js from scratch",
+  "instructor": {
+    "_id": "65instructor456...",
+    "name": "Jane Instructor",
+    "email": "jane@example.com",
+    "instructorRating": 4.2,
+    "totalInstructorReviews": 25
+  },
+  "students": [...],
+  "lessons": [...],
+  "quizzes": [...],
+  "averageRating": 4.8,
+  "totalReviews": 15,
+  "ratingDistribution": {
+    "5": 10,
+    "4": 3,
+    "3": 2,
+    "2": 0,
+    "1": 0
+  },
+  "createdAt": "2025-01-08T...",
+  "updatedAt": "2025-01-08T..."
+}
+
+
+═══════════════════════════════════════════════════════════════════
+🧪 TESTING WORKFLOW
+═══════════════════════════════════════════════════════════════════
+
+RECOMMENDED TESTING SEQUENCE:
+
+1. **Setup Phase:**
+   - Register student and instructor users
+   - Create a course as instructor
+   - Enroll student in the course
+
+2. **Feedback Creation:**
+   - Login as student
+   - Create feedback for the enrolled course
+   - Verify course and instructor ratings are updated
+
+3. **Feedback Retrieval:**
+   - Get course feedback (public)
+   - Get instructor feedback (public)
+   - Get student's own feedback
+
+4. **Feedback Management:**
+   - Update feedback (within 30 days)
+   - Mark feedback as helpful
+   - Try to create duplicate feedback (should fail)
+
+5. **Permission Testing:**
+   - Try to create feedback without enrollment (should fail)
+   - Try to update someone else's feedback (should fail)
+   - Try to update feedback after 30 days (should fail)
+
+6. **Rating Verification:**
+   - Check course listing shows updated ratings
+   - Check course details shows rating distribution
+   - Check instructor profile shows aggregated ratings
+
+
+═══════════════════════════════════════════════════════════════════
+⚠️ COMMON ERRORS & SOLUTIONS
+═══════════════════════════════════════════════════════════════════
+
+ERROR: "You must be enrolled in this course to leave feedback"
+→ Student must be enrolled in the course first
+
+ERROR: "You have already provided feedback for this course"
+→ Only one feedback per student per course is allowed
+
+ERROR: "Feedback can only be edited within 30 days of creation"
+→ Feedback has an edit window of 30 days
+
+ERROR: "You can only update your own feedback"
+→ Students can only modify their own feedback
+
+ERROR: "Course not found" / "Instructor not found"
+→ Invalid course or instructor ID provided
+
+
+═══════════════════════════════════════════════════════════════════
+📝 FEATURES IMPLEMENTED
+═══════════════════════════════════════════════════════════════════
+
+✅ Course Rating System (1-5 stars)
+✅ Instructor Rating System (1-5 stars)
+✅ Written Reviews for both courses and instructors
+✅ Rating Aggregation and Distribution
+✅ Enrollment Verification
+✅ One Feedback per Student per Course
+✅ Feedback Edit Window (30 days)
+✅ Helpful Votes System
+✅ Pagination and Sorting
+✅ Real-time Rating Updates
+✅ Comprehensive Permission System
+
+═══════════════════════════════════════════════════════════════════

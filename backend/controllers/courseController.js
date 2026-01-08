@@ -12,7 +12,9 @@ exports.createCourse = async (req, res) => {
 
 //get all courses
 exports.getCourses = async (req, res) => {
-  const courses = await Course.find().populate("instructor", "name");
+  const courses = await Course.find()
+    .populate("instructor", "name instructorRating totalInstructorReviews")
+    .select("title description instructor averageRating totalReviews createdAt");
   res.json(courses);
 };
 
@@ -21,7 +23,13 @@ exports.getCourses = async (req, res) => {
 
 exports.getCourseById = async (req, res) => {
   const course = await Course.findById(req.params.id)
-    .populate("instructor students");
+    .populate("instructor", "name email instructorRating totalInstructorReviews")
+    .populate("students", "name email");
+  
+  if (!course) {
+    return res.status(404).json({ message: "Course not found" });
+  }
+  
   res.json(course);
 };
 

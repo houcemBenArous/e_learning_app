@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 
 module.exports = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -9,8 +8,12 @@ module.exports = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // récupérer user complet (id + role)
-    req.user = await User.findById(decoded.id).select("_id role");
+    // Utiliser directement les données du token (id, email, role)
+    req.user = {
+      _id: decoded.id,
+      email: decoded.email,
+      role: decoded.role
+    };
 
     next();
   } catch (error) {
